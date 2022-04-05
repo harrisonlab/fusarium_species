@@ -205,4 +205,19 @@ ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
 sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
 done
 done
+
+for Strain in AJ592 AJ705; do
+for Assembly in $(ls assembly/race_4/$Strain/"$Strain"*fasta); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
+Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/codingquary/$Organism/$Strain/
+mkdir -p $OutDir
+GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
+ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
+done
+done
 ```
+
+python $QUARRY_PATH/scripts/fastaTranslate.py out/Predicted_CDS.fa | sed 's/*$//g' > CQ_Proteins.fa
