@@ -191,3 +191,18 @@ scp -r /projects/oldhome/armita/prog/cufflinks/ agomez@gruffalo.cropdiversity.ac
         done
     done
 ```
+
+```bash
+for Strain in AJ520 AJ516; do
+for Assembly in $(ls assembly/race_*/$Strain/"$Strain"_contigs_unmasked.fa); do
+Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
+Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+echo "$Organism - $Strain"
+OutDir=gene_pred/codingquary/$Organism/$Strain/
+mkdir -p $OutDir
+GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
+ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
+done
+done
+```
