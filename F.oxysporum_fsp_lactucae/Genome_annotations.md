@@ -198,7 +198,7 @@ for Assembly in $(ls assembly/race_*/$Strain/"$Strain"_contigs_unmasked.fa); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
 Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
-OutDir=gene_pred/codingquary/$Organism/$Strain/
+OutDir=gene_pred/codingquarry/$Organism/$Strain/
 mkdir -p $OutDir
 GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
 ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
@@ -211,7 +211,7 @@ for Assembly in $(ls assembly/race_4/$Strain/"$Strain"*fasta); do
 Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
 Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
-OutDir=gene_pred/codingquary/$Organism/$Strain/
+OutDir=gene_pred/codingquarry/$Organism/$Strain/
 mkdir -p $OutDir
 GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
 ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
@@ -220,4 +220,75 @@ done
 done
 ```
 
-python $QUARRY_PATH/scripts/fastaTranslate.py out/Predicted_CDS.fa | sed 's/*$//g' > CQ_Proteins.fa
+
+## Add additional transcripts to Braker gene models.
+MOVE TO OUR HPC
+
+
+Additional transcripts predicted by CodingQuarry are added to the final gene models.
+
+```bash
+  # The following perl scripts requires the installation of some libraries. Run these commands in a perly environment.
+  # Install the required libraries (if any) using cpanm
+  # cpanm Bio::Perl
+conda activate perly_env
+
+for Strain in AJ520; do
+BrakerGff=$(ls gene_pred/braker/*/$Strain/augustus.hints.gff3)
+Strain=$(echo $BrakerGff| rev | cut -d '/' -f2 | rev)
+Organism=$(echo $BrakerGff | rev | cut -d '/' -f3 | rev)
+echo "$Organism - $Strain"
+Assembly=$(ls assembly/race_*/$Strain/"$Strain"_contigs_unmasked.fa)
+CodingQuarryGff=gene_pred/codingquarry/$Organism/$Strain/out/PredictedPass.gff3
+PGNGff=gene_pred/codingquarry/$Organism/$Strain/out/PGN_predictedPass.gff3
+AddDir=gene_pred/codingquarry/$Organism/$Strain/additional # Additional transcripts directory
+FinalDir=gene_pred/codingquarry/$Organism/$Strain/final # Final directory
+AddGenesList=$AddDir/additional_genes.txt
+AddGenesGff=$AddDir/additional_genes.gff
+FinalGff=$AddDir/combined_genes.gff
+mkdir -p $AddDir
+mkdir -p $FinalDir
+
+# Create a list with the additional transcripts in CondingQuarry gff (and CQPM) vs Braker gene models
+bedtools intersect -v -a $CodingQuarryGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' > $AddGenesList
+bedtools intersect -v -a $PGNGff -b $BrakerGff | grep 'gene'| cut -f2 -d'=' | cut -f1 -d';' >> $AddGenesList
+
+# Creat Gff file with the additional transcripts
+ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+$ProgDir/gene_list_to_gff.pl $AddGenesList $CodingQuarryGff CodingQuarry_v2.0 ID CodingQuary > $AddGenesGff
+$ProgDir/gene_list_to_gff.pl $AddGenesList $PGNGff PGNCodingQuarry_v2.0 ID CodingQuary >> $AddGenesGff
+
+# Create a final Gff file with gene features
+$ProgDir/add_CodingQuary_features.pl $AddGenesGff $Assembly > $FinalDir/final_genes_CodingQuary.gff3
+
+# Create fasta files from each gene feature in the CodingQuarry gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_CodingQuary.gff3 $FinalDir/final_genes_CodingQuary
+
+# Create fasta files from each gene feature in the Braker gff3
+# If any "Possible precedence issue with control flow operator" error, change "or" for "||" operator
+cp $BrakerGff $FinalDir/final_genes_Braker.gff3
+$ProgDir/gff2fasta.pl $Assembly $FinalDir/final_genes_Braker.gff3 $FinalDir/final_genes_Braker
+
+# Combine both fasta files
+cat $FinalDir/final_genes_Braker.pep.fasta $FinalDir/final_genes_CodingQuary.pep.fasta | sed -r 's/\*/X/g' > $FinalDir/final_genes_combined.pep.fasta
+cat $FinalDir/final_genes_Braker.cdna.fasta $FinalDir/final_genes_CodingQuary.cdna.fasta > $FinalDir/final_genes_combined.cdna.fasta
+cat $FinalDir/final_genes_Braker.gene.fasta $FinalDir/final_genes_CodingQuary.gene.fasta > $FinalDir/final_genes_combined.gene.fasta
+cat $FinalDir/final_genes_Braker.upstream3000.fasta $FinalDir/final_genes_CodingQuary.upstream3000.fasta > $FinalDir/final_genes_combined.upstream3000.fasta
+
+# Combine both gff3 files
+GffBraker=$FinalDir/final_genes_CodingQuary.gff3
+GffQuary=$FinalDir/final_genes_Braker.gff3
+GffAppended=$FinalDir/final_genes_appended.gff3
+cat $GffBraker $GffQuary > $GffAppended
+done 
+
+  # Check the final number of genes
+
+for DirPath in $(ls -d $FinalDir); do
+echo $DirPath;
+cat $DirPath/final_genes_Braker.pep.fasta | grep '>' | wc -l;
+cat $DirPath/final_genes_CodingQuary.pep.fasta | grep '>' | wc -l;
+cat $DirPath/final_genes_combined.pep.fasta | grep '>' | wc -l;
+echo "";
+done
+  ```
