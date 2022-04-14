@@ -110,13 +110,23 @@ scp -r /main/projects/Fus_all_Ex/RNAseq/X204SC21111729-Z01-F001/raw_data/Folac_R
             done
         done
     done
+
 # race 4
+# Contigs sorted in reverse. Sort and rename with seqkit
+
     for Strain in AJ592 AJ705; do
-        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"*fasta); do
-        echo "$Assembly"
-        Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev) 
-        Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
-        echo "$Organism - $Strain"
+        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"_22022022.fasta); do
+        OutDir=$(dirname $Assembly)
+        seqkit sort --by-length --reverse $Assembly | seqkit replace --pattern '.+' --replacement 'contig_{nr}' > $OutDir/"$Strain"_renamed_unmasked.fa
+        done
+    done
+
+    for Strain in AJ592 AJ705; do
+        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"_renamed_unmasked.fa); do
+            echo "$Assembly"
+            Strain=$(echo $Assembly | rev | cut -f2 -d '/' | rev) 
+            Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
+            echo "$Organism - $Strain"
             for FileF in $(ls qc_rna/X204SC21111729-Z01-F001/race_*/AJ516/cleaned/F/Folac_R*_1_cleaned.fq.gz)
             do
             FileR=$(echo $FileF | sed 's&/F/&/R/&g'| sed 's/_1_cleaned/_2_cleaned/g')
@@ -124,7 +134,7 @@ scp -r /main/projects/Fus_all_Ex/RNAseq/X204SC21111729-Z01-F001/raw_data/Folac_R
             echo $FileR
             Sample_Name=$(echo $FileF | rev | cut -d '/' -f1 | rev | sed 's/_1_cleaned.fq.gz//g')
             OutDir=alignment/star/$Organism/$Strain/$Sample_Name
-            ProgDir=/home/agomez/scratch/apps/scripts/bioinformatics_tools/Genome_aligners
+            ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Genome_aligners
             sbatch $ProgDir/star.sh $Assembly $FileF $FileR $OutDir 11
             done
         done
@@ -491,25 +501,6 @@ cat analysis/effectorP_3.0/race_1/$Strain/*_Cytoplasmic_Effectors_headers.txt | 
 cat analysis/effectorP_3.0/race_1/$Strain/*_Apoplastic_Effectors_headers.txt | sed '1d' > analysis/effectorP_3.0/race_1/$Strain/apo.txt
 cat analysis/effectorP_3.0/race_1/$Strain/cit.txt analysis/effectorP_3.0/*/$Strain/apo.txt | sort | uniq > analysis/effectorP_3.0/race_1/$Strain/"$Strain"_Effector_header_combined.txt
 done
-
-for Strain in AJ520 AJ516 AJ592 AJ705; do
-  for Headers in $(ls analysis/effectorP*/*/$Strain/*Effector_header_combined.txt); do
-    Strain=$(echo $Headers | rev | cut -f2 -d '/' | rev)
-    Organism=$(echo $Headers | rev | cut -f3 -d '/' | rev)
-    echo "$Organism - $Strain"
-    Secretome=$(ls gene_pred/final_genes_signalp-4.1/$Organism/$Strain/*_final_sp_no_trans_mem.aa)
-    
-    OutFile=$(echo "$Headers" | sed 's/_EffectorP.txt/_EffectorP_secreted.aa/g')
-    ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
-    $ProgDir/extract_from_fasta.py --fasta $Secretome --headers $Headers > $OutFile
-    OutFileHeaders=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted_headers.txt/g')
-    cat $OutFile | grep '>' | tr -d '>' > $OutFileHeaders
-    cat $OutFileHeaders | wc -l
-    Gff=$(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.gff3)
-    EffectorP_Gff=$(echo "$File" | sed 's/_EffectorP.txt/_EffectorP_secreted.gff/g')
-    $ProgDir/extract_gff_for_sigP_hits.pl $OutFileHeaders $Gff effectorP ID > $EffectorP_Gff
-    cat $EffectorP_Gff | grep -w 'gene' | wc -l
-  done > tmp.txt
 ```
 
 ## Identification of MIMP-flanking genes
@@ -548,20 +539,26 @@ done
 ```
 
 
-## 6. CAZY proteins
+
+
+
+
+
+
+### CAZY proteins
 
 Carbohydrte active enzymes were identified from the CAZy database
 
 ```bash
-for Strain in Strain1 Strain2; do # List of isolates
-  for Proteome in $(ls path/to/pep/fasta/final_genes_combined.pep.fasta); do
+for Strain in AJ520 AJ516 AJ592 AJ705; do 
+  for Proteome in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
     Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
     Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
     OutDir=gene_pred/CAZY/$Organism/$Strain
     mkdir -p $OutDir
     Prefix="$Strain"_CAZY
     CazyHmm=../dbCAN/dbCAN-HMMdb-V8.txt # databases are in /projects
-    ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/Feature_annotation
+    ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
     sbatch $ProgDir/hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
   done
 done
