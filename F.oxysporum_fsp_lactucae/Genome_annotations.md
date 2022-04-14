@@ -151,28 +151,25 @@ scp -r /main/projects/Fus_all_Ex/RNAseq/X204SC21111729-Z01-F001/raw_data/Folac_R
             OutDir=gene_pred/braker/$Organism/$Strain
             AcceptedHits=alignment/star/assembly/$Strain/*/*_aligmentAligned.sortedByCoord.out.bam 
             GeneModelName="$Organism"_"$Strain"_braker 
-            ProgDir=/home/agomez/scratch/apps/scripts/bioinformatics_tools/Gene_prediction
+            ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
             sbatch -p himem $ProgDir/braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
         done
     done
 
     for Strain in AJ592 AJ705; do
-        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"*fasta); do
+        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"_renamed_unmasked.fa); do
             Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
             Organism=$(echo $Assembly | rev | cut -f3 -d '/' | rev)
             OutDir=gene_pred/braker/$Organism/$Strain
             AcceptedHits=alignment/star/race_4/$Strain/*/*_aligmentAligned.sortedByCoord.out.bam 
-            GeneModelName="$Organism"_"$Strain"_braker 
-            ProgDir=/home/agomez/scratch/apps/scripts/bioinformatics_tools/Gene_prediction
+            GeneModelName="$Organism"_"$Strain"_braker_renamed 
+            ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
             sbatch -p himem $ProgDir/braker_fungi.sh $Assembly $OutDir $AcceptedHits $GeneModelName
         done
     done
 ```
 
-
 ## Cufflinks
-
-scp -r /projects/oldhome/armita/prog/cufflinks/ agomez@gruffalo.cropdiversity.ac.uk:/home/agomez/scratch
 
 ```bash
     for Strain in AJ520 AJ516; do
@@ -189,18 +186,20 @@ scp -r /projects/oldhome/armita/prog/cufflinks/ agomez@gruffalo.cropdiversity.ac
     done
 
     for Strain in AJ592 AJ705; do
-        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"*fasta); do
+        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"_renamed_unmasked.fa); do
             Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev)
             Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev) 
             echo "$Organism - $Strain"
             OutDir=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim
             mkdir -p $OutDir
             AcceptedHits=alignment/star/race_4/$Strain/*/*_aligmentAligned.sortedByCoord.out.bam 
-            ProgDir=/home/agomez/scratch/apps/scripts/bioinformatics_tools/Gene_prediction
+            ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
             sbatch $ProgDir/cufflinks.sh $AcceptedHits $OutDir
         done
     done
 ```
+
+## Codingquarry
 
 ```bash
 for Strain in AJ520 AJ516; do
