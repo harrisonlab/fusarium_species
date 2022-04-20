@@ -250,12 +250,12 @@ fold assembly/race_4/AJ705/AJ705_22022022.fasta > assembly/race_4/AJ705/AJ705_un
 ```
 
 ```bash
-for Strain in AJ520 AJ516 AJ592 AJ705; do
+for Strain in AJ592 AJ705; do
 for BrakerGff in $(ls gene_pred/braker/*/$Strain/augustus.hints.gff3); do
 Strain=$(echo $BrakerGff| rev | cut -d '/' -f2 | rev)
 Organism=$(echo $BrakerGff | rev | cut -d '/' -f3 | rev)
 echo "$Organism - $Strain"
-Assembly=assembly/*/$Strain/"$Strain"_unmasked_folded.fasta
+Assembly=assembly/*/$Strain/"$Strain"_renamed_unmasked.fa
 CodingQuarryGff=gene_pred/codingquarry/$Organism/$Strain/out/PredictedPass.gff3
 PGNGff=gene_pred/codingquarry/$Organism/$Strain/out/PGN_predictedPass.gff3
 AddDir=gene_pred/codingquarry/$Organism/$Strain/additional # Additional transcripts directory
@@ -301,6 +301,7 @@ cat $GffBraker $GffQuary > $GffAppended
 done
 done
 ```
+
 ```bash
 # Check the final number of genes
 for Strain in AJ520 AJ516 AJ592 AJ705; do
@@ -325,45 +326,94 @@ gene_pred/codingquarry/race_4/AJ516/final
 23062
 
 gene_pred/codingquarry/race_4/AJ592/final
-20768
-1903
-22671
+20795
+1831
+22626
 
 gene_pred/codingquarry/race_4/AJ705/final
-21002
-1732
-22734
+21165
+1611
+22776
 ```
 
-
-  ### Remove duplicate and rename genes.
+### Remove duplicate and rename genes.
 
   ```bash
+    for Strain in AJ520 AJ516; do
+        for GffAppended in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended.gff3); do
+        Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+        Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+        echo "$Organism - $Strain"
+        FinalDir=gene_pred/codingquarry/$Organism/$Strain/final
+        # Remove duplicated genes
+        GffFiltered=gene_pred/codingquarry/$Organism/$Strain/final/filtered_duplicates.gff
+        ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+        $ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
+        # Rename genes
+        GffRenamed=gene_pred/codingquarry/$Organism/$Strain/final/final_genes_appended_renamed.gff3
+        LogFile=gene_pred/codingquarry/$Organism/$Strain/final/final_genes_appended_renamed.log
+        $ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+        rm $GffFiltered
+        # Create renamed fasta files from each gene feature   
+        Assembly=$(ls assembly/$Organism/$Strain/"$Strain"_unmasked_folded.fasta)
+        $ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed
+        # The proteins fasta file contains * instead of Xs for stop codons, these should be changed
+        sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
+        done 
+    done
 
+    for Strain in AJ592 AJ705; do
+        for GffAppended in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended.gff3); do
+        Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
+        Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
+        echo "$Organism - $Strain"
+        FinalDir=gene_pred/codingquarry/$Organism/$Strain/final
+        # Remove duplicated genes
+        GffFiltered=gene_pred/codingquarry/$Organism/$Strain/final/filtered_duplicates.gff
+        ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+        $ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
+        # Rename genes
+        GffRenamed=gene_pred/codingquarry/$Organism/$Strain/final/final_genes_appended_renamed.gff3
+        LogFile=gene_pred/codingquarry/$Organism/$Strain/final/final_genes_appended_renamed.log
+        $ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
+        rm $GffFiltered
+        # Create renamed fasta files from each gene feature   
+        Assembly=$(ls assembly/$Organism/$Strain/"$Strain"_renamed_unmasked.fa)
+        $ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed
+        # The proteins fasta file contains * instead of Xs for stop codons, these should be changed
+        sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
+        done 
+    done
+```
 
-for Strain in AJ520 AJ516 AJ592 AJ705; do
-for GffAppended in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended.gff3); do
-Strain=$(echo $GffAppended | rev | cut -d '/' -f3 | rev)
-Organism=$(echo $GffAppended | rev | cut -d '/' -f4 | rev)
-echo "$Organism - $Strain"
-FinalDir=gene_pred/codingquarry/$Organism/$Strain/final
-# Remove duplicated genes
-GffFiltered=gene_pred/codingquarry/$Organism/$Strain/final/filtered_duplicates.gff
-ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
-$ProgDir/remove_dup_features.py --inp_gff $GffAppended --out_gff $GffFiltered
-# Rename genes
-GffRenamed=gene_pred/codingquarry/$Organism/$Strain/final/final_genes_appended_renamed.gff3
-LogFile=gene_pred/codingquarry/$Organism/$Strain/final/final_genes_appended_renamed.log
-$ProgDir/gff_rename_genes.py --inp_gff $GffFiltered --conversion_log $LogFile > $GffRenamed
-rm $GffFiltered
-# Create renamed fasta files from each gene feature   
-Assembly=$(ls assembly/$Organism/$Strain/"$Strain"_unmasked_folded.fasta)
-$ProgDir/gff2fasta.pl $Assembly $GffRenamed $FinalDir/final_genes_appended_renamed
-# The proteins fasta file contains * instead of Xs for stop codons, these should be changed
-sed -i 's/\*/X/g' $FinalDir/final_genes_appended_renamed.pep.fasta
-done 
+## Interproscan
+
+```bash
+AJ516 AJ592 AJ705
+
+for Strain in AJ592 AJ705; do
+for Genes in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
+echo $Genes
+ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
+$ProgDir/interproscan.sh $Genes
+done 2>&1 | tee -a interproscan_submisison.log
 done
 ```
+
+Following interproscan annotation split files were combined using the following commands:
+
+```bash
+  ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/Feature_annotation
+  for Proteins in $(ls path/to/the/final_genes_appended_renamed.pep.fasta); do
+    Strain=$(echo $Proteins | rev | cut -d '/' -f3 | rev)
+    Organism=$(echo $Proteins | rev | cut -d '/' -f4 | rev)
+    echo "$Organism - $Strain"
+    echo $Strain
+    InterProRaw=gene_pred/interproscan/$Organism/$Strain/raw
+    $ProgDir/append_interpro.sh $Proteins $InterProRaw
+  done
+```
+
 
 ### SignalP and tmhmm 
 
@@ -372,21 +422,21 @@ conda activate annotation
 ```
 ```bash
 # Version 6 is available and should be included here in the future.
-for Strain in AJ520 AJ516 AJ592 AJ705; do
-ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
-CurPath=$PWD
-for Proteome in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
-Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-SplitDir=gene_pred/final_genes_split/$Organism/$Strain
-mkdir -p $SplitDir
-BaseName="$Organism""_$Strain"_final_preds
-$ProgDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName 
-for File in $(ls $SplitDir/*_final_preds_*); do
-sbatch $ProgDir/pred_signalP.sh $File signalp-4.1 
-done
-done
-done
+    for Strain in AJ520 AJ516 AJ592 AJ705; do
+    ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
+    CurPath=$PWD
+        for Proteome in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
+        Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+        Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+        SplitDir=gene_pred/final_genes_split/$Organism/$Strain
+        mkdir -p $SplitDir
+        BaseName="$Organism""_$Strain"_final_preds
+        $ProgDir/splitfile_500.py --inp_fasta $Proteome --out_dir $SplitDir --out_base $BaseName 
+            for File in $(ls $SplitDir/*_final_preds_*); do
+            sbatch $ProgDir/pred_signalP.sh $File signalp-4.1 
+            done
+        done
+    done
 ```
 
 
@@ -396,33 +446,33 @@ done
 The batch files of predicted secreted proteins needed to be combined into a single file for each strain. This was done with the following commands:
 
  ```bash
-for Strain in AJ520 AJ516 AJ592 AJ705; do
-  for SplitDir in $(ls -d gene_pred/final_genes_split/*/$Strain); do
-    Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
-    Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
-    InStringAA=''
-    InStringNeg=''
-    InStringTab=''
-    InStringTxt=''
-    SigpDir=final_genes_signalp-4.1
-    for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do
-      InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";
-      InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";
-      InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
-      InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";
-    done
-    cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
-    cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
-    tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
-    cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
-  done
+for Strain in AJ592 AJ705; do
+for SplitDir in $(ls -d gene_pred/final_genes_split/*/$Strain); do
+Strain=$(echo $SplitDir | rev |cut -d '/' -f1 | rev)
+Organism=$(echo $SplitDir | rev |cut -d '/' -f2 | rev)
+InStringAA=''
+InStringNeg=''
+InStringTab=''
+InStringTxt=''
+SigpDir=final_genes_signalp-4.1
+for GRP in $(ls -l $SplitDir/*_final_preds_*.fa | rev | cut -d '_' -f1 | rev | sort -n); do
+InStringAA="$InStringAA gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.aa";
+InStringNeg="$InStringNeg gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp_neg.aa";
+InStringTab="$InStringTab gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.tab";
+InStringTxt="$InStringTxt gene_pred/$SigpDir/$Organism/$Strain/split/"$Organism"_"$Strain"_final_preds_$GRP""_sp.txt";
+done
+cat $InStringAA > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.aa
+cat $InStringNeg > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_neg_sp.aa
+tail -n +2 -q $InStringTab > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.tab
+cat $InStringTxt > gene_pred/$SigpDir/$Organism/$Strain/"$Strain"_final_sp.txt
+done
 done
 ```
 
 Proteins containing a transmembrane domain were identified:
 
 ```bash
-for Strain in AJ520 AJ516 AJ592 AJ705; do
+for Strain in AJ592 AJ705; do
 for Proteome in $(ls gene_pred/*/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
 Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
 Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
@@ -431,6 +481,10 @@ sbatch $ProgDir/TMHMM.sh $Proteome
 done
 done
  ```
+
+
+
+ 
 
  Those proteins with transmembrane domains were removed from lists of Signal peptide containing proteins
 
@@ -513,57 +567,54 @@ Miniature impala (mimp) sequeces are found in promotor regions of SIX genes in f
 ```bash
 conda activate perly_env
 
-for Strain in AJ520 AJ516 AJ592 AJ705; do
-for Assembly in $(ls assembly/*/$Strain/"$Strain"_unmasked_folded.fasta); do
-Organism=$(echo "$Assembly" | rev | cut -d '/' -f3 | rev)
-Strain=$(echo "$Assembly" | rev | cut -d '/' -f2 | rev)
-GeneGff=$(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.gff3)
-OutDir=analysis/mimps/$Organism/$Strain
-mkdir -p "$OutDir"
-echo "$Organism - $Strain"
-ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
-$ProgDir/mimp_finder.pl $Assembly $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
-$ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
-echo "The number of mimps identified:"
-cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
-bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
-echo "The following transcripts intersect mimps:"
-MimpProtsTxt=$OutDir/"$Strain"_prots_in_2kb_mimp.txt
-MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
-cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpProtsTxt
-cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | cut -f1 -d '.'| sort | uniq > $MimpGenesTxt
-cat $MimpProtsTxt | wc -l
-cat $MimpGenesTxt | wc -l
-echo ""
-done
-done
+    for Strain in AJ520 AJ516 AJ592 AJ705; do
+        for Assembly in $(ls assembly/*/$Strain/"$Strain"_unmasked_folded.fasta); do
+        Organism=$(echo "$Assembly" | rev | cut -d '/' -f3 | rev)
+        Strain=$(echo "$Assembly" | rev | cut -d '/' -f2 | rev)
+        GeneGff=$(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.gff3)
+        OutDir=analysis/mimps/$Organism/$Strain
+        mkdir -p "$OutDir"
+        echo "$Organism - $Strain"
+        ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
+        $ProgDir/mimp_finder.pl $Assembly $OutDir/"$Strain"_mimps.fa $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps.log
+        $ProgDir/gffexpander.pl +- 2000 $OutDir/"$Strain"_mimps.gff > $OutDir/"$Strain"_mimps_exp.gff
+        echo "The number of mimps identified:"
+        cat $OutDir/"$Strain"_mimps.fa | grep '>' | wc -l
+        bedtools intersect -u -a $GeneGff -b $OutDir/"$Strain"_mimps_exp.gff > $OutDir/"$Strain"_genes_in_2kb_mimp.gff
+        echo "The following transcripts intersect mimps:"
+        MimpProtsTxt=$OutDir/"$Strain"_prots_in_2kb_mimp.txt
+        MimpGenesTxt=$OutDir/"$Strain"_genes_in_2kb_mimp.txt
+        cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | sort | uniq > $MimpProtsTxt
+        cat $OutDir/"$Strain"_genes_in_2kb_mimp.gff | grep -w 'mRNA' | cut -f9 | cut -f1 -d';' | cut -f2 -d'=' | cut -f1 -d '.'| sort | uniq > $MimpGenesTxt
+        cat $MimpProtsTxt | wc -l
+        cat $MimpGenesTxt | wc -l
+        echo ""
+        done
+    done
 ```
-
-
-
-
-
-
-
 
 ### CAZY proteins
 
 Carbohydrte active enzymes were identified from the CAZy database
 
 ```bash
-for Strain in AJ520 AJ516 AJ592 AJ705; do 
-  for Proteome in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
-    Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
-    Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
-    OutDir=gene_pred/CAZY/$Organism/$Strain
-    mkdir -p $OutDir
-    Prefix="$Strain"_CAZY
-    CazyHmm=../dbCAN/dbCAN-HMMdb-V8.txt # databases are in /projects
-    ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
-    sbatch $ProgDir/hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
-  done
-done
+    for Strain in AJ520 AJ516 AJ592 AJ705; do 
+    for Proteome in $(ls gene_pred/codingquarry/*/$Strain/final/final_genes_appended_renamed.pep.fasta); do
+        Strain=$(echo $Proteome | rev | cut -f3 -d '/' | rev)
+        Organism=$(echo $Proteome | rev | cut -f4 -d '/' | rev)
+        OutDir=gene_pred/CAZY/$Organism/$Strain
+        mkdir -p $OutDir
+        Prefix="$Strain"_CAZY
+        CazyHmm=../../apps/dbCAN/bcb.unl.edu/dbCAN2/download/dbCAN-HMMdb-V10.txt # databases are in /projects
+        ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Feature_annotation
+        sbatch $ProgDir/hmmscan.sh $CazyHmm $Proteome $Prefix $OutDir
+    done
+    done
 ```
+
+
+
+
 ```bash
  for File in $(ls path/to/*CAZY.out.dm); do
   Strain=$(echo $File | rev | cut -f2 -d '/' | rev)
@@ -592,3 +643,22 @@ done
   cat $CazyGffSecreted | grep -w 'gene' | cut -f9 | tr -d 'ID=' | wc -l
   done
   ```
+
+## Transcription factors
+
+```bash
+  for Interpro in $(ls gene_pred/interproscan/$Organism/$Strain/*_interproscan.tsv); do
+    Organism=$(echo $Interpro | rev | cut -f3 -d '/' | rev)
+    Strain=$(echo $Interpro | rev | cut -f2 -d '/' | rev)
+    echo "$Organism - $Strain"
+    OutDir=analysis/transcription_factors/$Organism/$Strain
+    mkdir -p $OutDir
+    ProgDir=/home/gomeza/git_repos/scripts/bioinformatics_tools/Feature_annotation
+    $ProgDir/interpro2TFs.py --InterPro $Interpro > $OutDir/"$Strain"_TF_domains.tsv
+    echo "total number of transcription factors"
+    cat $OutDir/"$Strain"_TF_domains.tsv | cut -f1 | sort | uniq > $OutDir/"$Strain"_TF_gene_headers.txt
+    cat $OutDir/"$Strain"_TF_gene_headers.txt | wc -l
+    # Gene ID rather than transcript ID
+    cat $OutDir/"$Strain"_TF_gene_headers.txt | sed -e "s/.t.*//g" > $OutDir/"$Strain"_TF_geneid_headers.txt
+  done
+```
