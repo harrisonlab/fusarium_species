@@ -26,7 +26,7 @@ ls /projects/oldhome/groups/harrisonlab/project_files/fusarium/qc_dna/paired
 
 ### Aditional repositories
 
-For reference only. This fsp are included in the fusarium folder and data here might be duplicated.
+For reference only. These fsp are included in the fusarium folder and data here might be duplicated.
 
 #### fusarium_ex_narcissus
 
