@@ -3,7 +3,7 @@ Analysis of fusarium species and F. oxysporum species complex
 
 ## AA old repositories and directories on NIAB HPC
 
-#### fusarium
+### fusarium
 
 Old fusarium species folder
 
@@ -46,7 +46,7 @@ https://github.com/harrisonlab/fusarium_ex_pea
 /projects/oldhome/groups/harrisonlab/project_files/fusarium_pea # Duplicated data
 ```
 
-##### fusarium_ex_strawberry_ning_2015
+#### fusarium_ex_strawberry_ning_2015
 
 https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a524f712856d2ebf8e4cc/ning
 
