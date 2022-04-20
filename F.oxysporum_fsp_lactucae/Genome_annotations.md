@@ -202,31 +202,33 @@ scp -r /main/projects/Fus_all_Ex/RNAseq/X204SC21111729-Z01-F001/raw_data/Folac_R
 ## Codingquarry
 
 ```bash
-for Strain in AJ520 AJ516; do
-for Assembly in $(ls assembly/race_*/$Strain/"$Strain"_contigs_unmasked.fa); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
-Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/codingquarry/$Organism/$Strain/
-mkdir -p $OutDir
-GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
-ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
-sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
-done
-done
+conda activate python_py27
 
-for Strain in AJ592 AJ705; do
-for Assembly in $(ls assembly/race_4/$Strain/"$Strain"*fasta); do
-Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
-Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
-echo "$Organism - $Strain"
-OutDir=gene_pred/codingquarry/$Organism/$Strain/
-mkdir -p $OutDir
-GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
-ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
-sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
-done
-done
+    for Strain in AJ520 AJ516; do
+        for Assembly in $(ls assembly/race_*/$Strain/"$Strain"_contigs_unmasked.fa); do
+            Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
+            Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+            echo "$Organism - $Strain"
+            OutDir=gene_pred/codingquarry/$Organism/$Strain/
+            mkdir -p $OutDir
+            GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
+            ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+            sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
+        done
+    done
+
+    for Strain in AJ592 AJ705; do
+        for Assembly in $(ls assembly/race_4/$Strain/"$Strain"_renamed_unmasked.fa); do
+            Strain=$(echo $Assembly| rev | cut -d '/' -f2 | rev) 
+            Organism=$(echo $Assembly| rev | cut -d '/' -f3 | rev)
+            echo "$Organism - $Strain"
+            OutDir=gene_pred/codingquarry/$Organism/$Strain/
+            mkdir -p $OutDir
+            GTF=gene_pred/cufflinks/$Organism/$Strain/concatenated_prelim/transcripts.gtf
+            ProgDir=/home/agomez/scratch/apps/git_repos/bioinformatics_tools/Gene_prediction
+            sbatch $ProgDir/codingquarry.sh $Assembly $GTF $OutDir
+        done
+    done
 ```
 
 ## Add additional transcripts to Braker gene models.
