@@ -2,7 +2,7 @@
 
 ## AA old repositories and directories on NIAB HPC
 
-### fusarium
+#### fusarium
 
 Old fusarium species folder
 
@@ -22,7 +22,7 @@ ls /projects/oldhome/groups/harrisonlab/project_files/fusarium/qc_dna/paired
 # F.proliferatum strains: A8
 ```
 
-### Aditional repositories
+#### Aditional repositories
 
 For reference only. This fsp are included in the fusarium folder and data here might be duplicated.
 
@@ -45,7 +45,7 @@ https://github.com/harrisonlab/fusarium_ex_pea
 /projects/oldhome/groups/harrisonlab/project_files/fusarium_pea # Duplicated data
 ```
 
-#### fusarium_ex_strawberry_ning_2015
+##### fusarium_ex_strawberry_ning_2015
 
 https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a524f712856d2ebf8e4cc/ning
 
@@ -60,7 +60,7 @@ https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a5
 New analysis can be added to this one
 https://github.com/harrisonlab/fusarium_species
 
-### Directories
+#### Directories
 
 ```bash
 # New directory on NIAB HPC for storage
