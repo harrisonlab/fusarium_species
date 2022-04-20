@@ -1,4 +1,4 @@
-# Fusarium project information
+# fusarium project information
 
 ## AA old repositories and directories on NIAB HPC
 
