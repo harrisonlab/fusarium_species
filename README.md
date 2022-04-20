@@ -24,11 +24,11 @@ ls /projects/oldhome/groups/harrisonlab/project_files/fusarium/qc_dna/paired
 # F.proliferatum strains: A8
 ```
 
-####  Aditional repositories
+### Aditional repositories
 
 For reference only. This fsp are included in the fusarium folder and data here might be duplicated.
 
-####  fusarium_ex_narcissus
+#### fusarium_ex_narcissus
 
 <https://github.com/harrisonlab/Fusarium_ex_narcissus>
 
@@ -47,7 +47,7 @@ For reference only. This fsp are included in the fusarium folder and data here m
 /projects/oldhome/groups/harrisonlab/project_files/fusarium_pea # Duplicated data
 ```
 
-####  fusarium_ex_strawberry_ning_2015
+#### fusarium_ex_strawberry_ning_2015
 
 <https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a524f712856d2ebf8e4cc/ning>
 
