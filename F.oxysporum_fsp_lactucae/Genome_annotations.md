@@ -1,6 +1,6 @@
 # Analysis of F.oxysporum f.sp. lactucae genomes
 
-### Data organization
+#### Data organization
 
 ```bash
 # Raw data stored on NIAB HPC. Working directory on gruff
