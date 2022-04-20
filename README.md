@@ -1,13 +1,14 @@
 # fusarium_species
+
 Analysis of fusarium species and F. oxysporum species complex
 
 ## AA old repositories and directories on NIAB HPC
 
-#### fusarium
+####  fusarium
 
 Old fusarium species folder
 
-https://github.com/harrisonlab/fusarium
+<https://github.com/harrisonlab/fusarium>
 
 ```bash
 ls /projects/oldhome/groups/harrisonlab/project_files/fusarium/qc_dna/paired
@@ -23,13 +24,13 @@ ls /projects/oldhome/groups/harrisonlab/project_files/fusarium/qc_dna/paired
 # F.proliferatum strains: A8
 ```
 
-#### Aditional repositories
+####  Aditional repositories
 
 For reference only. This fsp are included in the fusarium folder and data here might be duplicated.
 
-#### fusarium_ex_narcissus
+####  fusarium_ex_narcissus
 
-https://github.com/harrisonlab/Fusarium_ex_narcissus
+<https://github.com/harrisonlab/Fusarium_ex_narcissus>
 
 ```bash
 # Strains: FON129  FON139  FON77  FON81  FON89
@@ -38,7 +39,7 @@ https://github.com/harrisonlab/Fusarium_ex_narcissus
 
 #### fusarium_ex_pea
 
-https://github.com/harrisonlab/fusarium_ex_pea
+<https://github.com/harrisonlab/fusarium_ex_pea>
 
 ```bash
 # Strains: F81  FOP1  FOP1-EMR  FOP2  FOP5  PG18  PG3  R2
@@ -46,10 +47,9 @@ https://github.com/harrisonlab/fusarium_ex_pea
 /projects/oldhome/groups/harrisonlab/project_files/fusarium_pea # Duplicated data
 ```
 
-#### fusarium_ex_strawberry_ning_2015
+####  fusarium_ex_strawberry_ning_2015
 
-https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a524f712856d2ebf8e4cc/ning
-
+<https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a524f712856d2ebf8e4cc/ning>
 
 ```bash
 #Strain: FeChina
@@ -59,7 +59,7 @@ https://github.com/harrisonlab/fusarium_ex_strawberry/tree/4befcad95f41e0c1b48a5
 ## AG new repository
 
 New analysis can be added to this one
-https://github.com/harrisonlab/fusarium_species
+<https://github.com/harrisonlab/fusarium_species>
 
 #### Directories
 
