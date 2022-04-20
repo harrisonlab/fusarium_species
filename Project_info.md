@@ -22,7 +22,7 @@ ls /projects/oldhome/groups/harrisonlab/project_files/fusarium/qc_dna/paired
 # F.proliferatum strains: A8
 ```
 
-#### Aditional repositories
+## Aditional repositories
 
 For reference only. This fsp are included in the fusarium folder and data here might be duplicated.
 
